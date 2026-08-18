@@ -22,8 +22,16 @@ export class ProductsService {
     private readonly redisService: RedisService
   ) {}
 
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+  async create(createProductDto: CreateProductDto): Promise<Product> {
+    const {rows} = await this.databaseService.query<Product>(
+      'INSERT INTO products (name, price, stock_quantity) VALUES ($1, $2, $3) RETURNING *',
+      [createProductDto.name, createProductDto.price, createProductDto.stock_quantity]
+    );
+
+    await this.redisService.del(this.CACHE_KEY_ALL);
+    this.logger.log('products:all cache invalidated after creation');
+
+    return rows[0];
   }
 
   async findAll(): Promise<{data: Product[], fromCache: boolean}> {
@@ -40,13 +48,5 @@ export class ProductsService {
     await this.redisService.set(this.CACHE_KEY_ALL, rows, this.TTL_SECONDS);
 
     return { data: rows, fromCache: false };
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} product`;
   }
 }
