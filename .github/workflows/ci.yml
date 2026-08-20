@@ -1,0 +1,57 @@
+name: Continuous Integration (CI)
+
+on:
+  push:
+    branches: [ main, develop, feat/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  code-quality:
+    name: Lint & Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: ./api
+        run: npm ci
+
+      - name: Validate Linting
+        working-directory: ./api
+        run: npm run lint --if-present
+
+      - name: Compile TypeScript (Build Check)
+        working-directory: ./api
+        run: npm run build
+
+  docker-build:
+    name: Docker Multi-stage Build Check
+    needs: code-quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Test Docker Image Build
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api
+          file: ./api/Dockerfile
+          push: false
+          tags: order-processing-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
