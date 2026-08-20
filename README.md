@@ -70,20 +70,24 @@ A high-performance distributed backend system designed for asynchronous order pr
 Clone the repository and launch all services with a single command:
 
 # Clone the repository
+```bash
 git clone [https://github.com/SEU-USUARIO/OrderProcessingSystem.git](https://github.com/SEU-USUARIO/OrderProcessingSystem.git)
 cd OrderProcessingSystem
+```
 
 # Build and start all services in detached mode
+```bash
 docker compose up --build -d
+```
 
 ---
 
 ## 🌐 Endpoints & Service Portals
 
-Interactive Swagger UI: http://localhost:3000/api/docs --- Public
-RabbitMQ Management Dashboard: http://localhost:15672 --- guest / guest
-PostgreSQL: localhost:5432 --- postgres / postgres123 (DB: orders_db)
-Redis: localhost:6379 --- No Password (local)
+* **Interactive Swagger UI:** http://localhost:3000/api/docs --- Public
+* **RabbitMQ Management Dashboard:** http://localhost:15672 --- guest / guest
+* **PostgreSQL:** localhost:5432 --- postgres / postgres123 (DB: orders_db)
+* **Redis:** localhost:6379 --- No Password (local)
 
 ---
 
@@ -93,6 +97,7 @@ Redis: localhost:6379 --- No Password (local)
 2. Send a GET /products request to view available stock and populate the Redis cache.
 
 3. Send a POST /orders request with a unique idempotencyKey and valid productId:
+```bash
 {
   "customerEmail": "user@example.com",
   "idempotencyKey": "order-test-uuid-001",
@@ -103,11 +108,14 @@ Redis: localhost:6379 --- No Password (local)
     }
   ]
 }
+```
 
 4. Observe the immediate 202 Accepted response.
 
 5. Track real-time worker processing, payment simulation, and cache invalidation in the terminal:
-    docker compose logs -f api
+```bash
+docker compose logs -f api
+```
 
 6. Check GET /orders/{id} to verify that the order status transitions from PENDING to COMPLETED.
 
@@ -174,19 +182,23 @@ Sistema distribuído de alto desempenho para processamento assíncrono de pedido
 Clone o repositório e inicie todos os serviços com um único comando:
 
 # Clone o repositório
+```bash
 git clone [https://github.com/lguilhermelb1/OrderProcessingSystem.git](https://github.com/lguilhermelb1/OrderProcessingSystem.git)
 cd OrderProcessingSystem
+```
 
 # Suba a infraestrutura e a API conteinerizada
+```bash
 docker compose up --build -d
+```
 
 ---
 
 ## 🌐 Endpoints & Painéis de Acesso
-Documentação Swagger: http://localhost:3000/api/docs --- Acesso público
-RabbitMQ Management Dashboard: http://localhost:15672 --- guest / guest
-PostgreSQL: localhost:5432 --- postgres / postgres123 (DB: orders_db)
-Redis: localhost:6379 --- Sem senha (local)
+* **Documentação Swagger:** http://localhost:3000/api/docs --- Acesso público
+* **RabbitMQ Management Dashboard:** http://localhost:15672 --- guest / guest
+* **PostgreSQL:** localhost:5432 --- postgres / postgres123 (DB: orders_db)
+* **Redis:** localhost:6379 --- Sem senha (local)
 
 ---
 
@@ -196,6 +208,7 @@ Redis: localhost:6379 --- Sem senha (local)
 2. Execute o endpoint GET /products para consultar os itens cadastrados e verificar o funcionamento do cache no Redis.
 
 3. Dispare uma requisição POST /orders informando uma idempotencyKey única e um productId válido:
+```bash
 {
   "customerEmail": "user@example.com",
   "idempotencyKey": "order-test-uuid-001",
@@ -206,11 +219,14 @@ Redis: localhost:6379 --- Sem senha (local)
     }
   ]
 }
+```
 
 4. A API retornará imediatamente status 202 Accepted.
 
 5. Acompanhe o processamento do Worker em tempo real:
-    docker compose logs -f api
+```bash
+docker compose logs -f api
+```
 
 6. Observe o endpoint GET /orders/{id} para verificar a transição de status de PENDING para COMPLETED.
 
