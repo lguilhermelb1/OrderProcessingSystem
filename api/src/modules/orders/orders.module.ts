@@ -1,4 +1,4 @@
-import { Module, Redirect } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
@@ -21,14 +21,14 @@ import { RedisService } from '../../common/redis/redis.service';
             queueOptions: {
               durable: true,
             },
-        }
-      }),
-      inject: [ConfigService],
-    },
-  ]),
+          },
+        }),
+        inject: [ConfigService],
+      },
+    ]),
   ],
   controllers: [OrdersController, OrdersConsumerController],
   providers: [OrdersService, DatabaseService, RedisService],
-  exports: [OrdersService]
+  exports: [OrdersService],
 })
 export class OrdersModule {}

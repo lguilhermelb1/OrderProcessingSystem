@@ -12,7 +12,8 @@ import Joi from 'joi';
       isGlobal: true,
       envFilePath: '.env',
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string().valid('development', 'production', 'test')
+        NODE_ENV: Joi.string()
+          .valid('development', 'production', 'test')
           .default('development'),
         PORT: Joi.number().default(3000),
 
@@ -31,13 +32,13 @@ import Joi from 'joi';
 
         // RabbitMQ configuration
         RABBITMQ_URL: Joi.string().required(),
-        RABBITMQ_ORDERS_QUEUE: Joi.string().required()
+        RABBITMQ_ORDERS_QUEUE: Joi.string().required(),
       }),
     }),
     ProductsModule,
     RedisModule,
     DatabaseModule,
-    OrdersModule
+    OrdersModule,
   ],
 })
 export class AppModule {}

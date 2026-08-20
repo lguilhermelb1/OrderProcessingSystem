@@ -19,13 +19,17 @@ export class ProductsService {
 
   constructor(
     private readonly databaseService: DatabaseService,
-    private readonly redisService: RedisService
+    private readonly redisService: RedisService,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const {rows} = await this.databaseService.query<Product>(
+    const { rows } = await this.databaseService.query<Product>(
       'INSERT INTO products (name, price, stock_quantity) VALUES ($1, $2, $3) RETURNING *',
-      [createProductDto.name, createProductDto.price, createProductDto.stock_quantity]
+      [
+        createProductDto.name,
+        createProductDto.price,
+        createProductDto.stock_quantity,
+      ],
     );
 
     await this.redisService.del(this.CACHE_KEY_ALL);
@@ -34,7 +38,7 @@ export class ProductsService {
     return rows[0];
   }
 
-  async findAll(): Promise<{data: Product[], fromCache: boolean}> {
+  async findAll(): Promise<{ data: Product[]; fromCache: boolean }> {
     const cached = await this.redisService.get<Product[]>(this.CACHE_KEY_ALL);
 
     if (cached) {
@@ -43,7 +47,9 @@ export class ProductsService {
     }
 
     this.logger.log('Fetching products from database');
-    const {rows} = await this.databaseService.query<Product>('SELECT * FROM products ORDER BY created_at DESC');
+    const { rows } = await this.databaseService.query<Product>(
+      'SELECT * FROM products ORDER BY created_at DESC',
+    );
 
     await this.redisService.set(this.CACHE_KEY_ALL, rows, this.TTL_SECONDS);
 
