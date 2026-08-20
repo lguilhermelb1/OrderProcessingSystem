@@ -8,24 +8,25 @@ A high-performance distributed backend system designed for asynchronous order pr
 
 ## 🏛️ System Architecture
 
+```text
 [HTTP Client / Swagger]
-│
-▼ (POST /orders - HTTP 202 Accepted)
+        │
+        ▼ (POST /orders - HTTP 202 Accepted)
 ┌──────────────────────────────────────────────────────────┐
 │                   NestJS API (Producer)                  │
 │  - Request Validation & Idempotency Checks (PostgreSQL)  │
 │  - Event Emission (RabbitMQ)                             │
 │  - Cache-Aside Strategy (Redis)                          │
 └──────────────┬───────────────────────────┬───────────────┘
-│                           │
-▼                           ▼
-┌─────────────────┐         ┌─────────────────┐
-│   PostgreSQL    │         │      Redis      │
-│ (ACID & Storage)│         │ (In-Memory Data)│
-└────────▲────────┘         └────────▲────────┘
-│                           │
-│  Consumes event           │ Invalidates cache
-│  and updates stock        │
+               │                           │
+               ▼                           ▼
+      ┌─────────────────┐         ┌─────────────────┐
+      │   PostgreSQL    │         │      Redis      │
+      │ (ACID & Storage)│         │ (In-Memory Data)│
+      └────────▲────────┘         └────────▲────────┘
+               │                           │
+               │  Consumes event           │ Invalidates cache
+               │  and updates stock        │
 ┌──────────────┴───────────────────────────┴───────────────┐
 │                 NestJS Worker (Consumer)                 │
 │  - Listens to 'orders_queue'                             │
@@ -33,7 +34,7 @@ A high-performance distributed backend system designed for asynchronous order pr
 │  - Executes Atomic Database Transactions                 │
 │  - Message Acknowledgment (ACK)                          │
 └──────────────────────────────────────────────────────────┘
-
+```
 
 ---
 
@@ -122,6 +123,7 @@ Sistema distribuído de alto desempenho para processamento assíncrono de pedido
 
 ## 🏛️ Arquitetura do Sistema
 
+```text
 [Cliente HTTP / Swagger]
 │
 ▼ (POST /orders - HTTP 202 Accepted)
@@ -131,15 +133,15 @@ Sistema distribuído de alto desempenho para processamento assíncrono de pedido
 │  - Publicação de Eventos (RabbitMQ)                      │
 │  - Estratégia de Caching Cache-Aside (Redis)             │
 └──────────────┬───────────────────────────┬───────────────┘
-│                           │
-▼                           ▼
-┌─────────────────┐         ┌─────────────────┐
-│   PostgreSQL    │         │      Redis      │
-│ (ACID & Storage)│         │ (In-Memory Data)│
-└────────▲────────┘         └────────▲────────┘
-│                           │
-│  Consome evento           │ Invalida cache
-│  e abate estoque          │
+               │                           │
+               ▼                           ▼
+      ┌─────────────────┐         ┌─────────────────┐
+      │   PostgreSQL    │         │      Redis      │
+      │ (ACID & Storage)│         │ (In-Memory Data)│
+      └────────▲────────┘         └────────▲────────┘
+               │                           │
+               │  Consome evento           │ Invalida cache
+               │  e abate estoque          │
 ┌──────────────┴───────────────────────────┴───────────────┐
 │                 NestJS Worker (Consumer)                 │
 │  - Escuta fila 'orders_queue'                            │
@@ -147,7 +149,7 @@ Sistema distribuído de alto desempenho para processamento assíncrono de pedido
 │  - Transação Atômica de baixa de estoque                 │
 │  - Confirmação de Mensagem (ACK)                         │
 └──────────────────────────────────────────────────────────┘
-
+```
 
 ---
 
