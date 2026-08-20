@@ -1,8 +1,8 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { DatabaseService } from '../../common/database/database.service';
 import { ClientProxy } from '@nestjs/microservices';
-import { RABBITMQ_SERVICE_NAME } from './orders.module';
+import { RABBITMQ_SERVICE_NAME } from './orders.constants';
 
 @Injectable()
 export class OrdersService {
@@ -21,12 +21,12 @@ export class OrdersService {
 
     if (checkIdempotency.rows.length > 0) {
       this.logger.warn(`Duplicate order creation attempt detected for idempotency key: ${createOrderDto.idempotencyKey}`);
-      throw new Error('Duplicate order creation attempt detected. This request has already been processed.');
+      throw new ConflictException('Duplicate order creation attempt detected. This request has already been processed.');
     }
 
     const productIds = createOrderDto.items.map(item => item.productId);
     const productsQuery = await this.dbService.query(
-      'SELECT id, stock_quantity FROM products WHERE id = ANY($1::uuid[])',
+      'SELECT id, price, stock_quantity FROM products WHERE id = ANY($1::uuid[])',
       [productIds]
     );
 
@@ -48,9 +48,11 @@ export class OrdersService {
     }
     
     var createdOrder;
+    const pool = (this.dbService as any).pool;
+    const client = await pool.connect();
 
     try{
-      await this.dbService.query('BEGIN');
+      await client.query('BEGIN');
       const orderInsertResult = await this.dbService.query(
         'INSERT INTO orders (customer_email, total_amount, status, idempotency_key) VALUES ($1, $2, $3, $4) RETURNING *',
         [createOrderDto.customerEmail, totalAmount, 'PENDING', createOrderDto.idempotencyKey]
@@ -61,7 +63,7 @@ export class OrdersService {
       for (const item of createOrderDto.items) {
         const product = productMap.get(item.productId);
         await this.dbService.query(
-          'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4)',
+          'INSERT INTO order_items (order_id, product_id, quantity, unit_price) VALUES ($1, $2, $3, $4)',
           [createdOrder.id, item.productId, item.quantity, product.price]
         );
       }
@@ -70,6 +72,8 @@ export class OrdersService {
       await this.dbService.query('ROLLBACK');
       this.logger.error('Error creating order', error);
       throw new InternalServerErrorException('Error creating order');
+    }finally {
+      client.release();
     }
 
     const orderDetails = {

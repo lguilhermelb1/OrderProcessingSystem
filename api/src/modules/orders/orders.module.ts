@@ -3,14 +3,14 @@ import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
-
-export const RABBITMQ_SERVICE_NAME = 'ORDERS_SERVICE_NAME';
+import { DatabaseService } from '../../common/database/database.service';
+import { RABBITMQ_SERVICE_NAME } from './orders.constants';
 
 @Module({
   imports: [
     ClientsModule.registerAsync([
       {
-        name: 'RABBITMQ_SERVICE_NAME',
+        name: RABBITMQ_SERVICE_NAME,
         useFactory: (config: ConfigService) => ({
           transport: Transport.RMQ,
           options: {
@@ -26,7 +26,7 @@ export const RABBITMQ_SERVICE_NAME = 'ORDERS_SERVICE_NAME';
   ]),
   ],
   controllers: [OrdersController],
-  providers: [OrdersService],
+  providers: [OrdersService, DatabaseService],
   exports: [OrdersService]
 })
 export class OrdersModule {}
