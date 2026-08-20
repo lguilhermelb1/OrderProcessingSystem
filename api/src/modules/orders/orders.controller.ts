@@ -7,7 +7,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { OrdersService } from './orders.service';
+import { OrderRow, OrdersService } from './orders.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
 
@@ -38,13 +38,13 @@ export class OrdersController {
     description:
       'Duplicate order creation attempt detected. This request has already been processed.',
   })
-  create(@Body() createOrderDto: CreateOrderDto) {
+  async create(@Body() createOrderDto: CreateOrderDto): Promise<{ message: string; order: OrderRow }> {
     return this.ordersService.create(createOrderDto);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get order details by ID' })
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<OrderRow> {
     return this.ordersService.findOne(id);
   }
 }

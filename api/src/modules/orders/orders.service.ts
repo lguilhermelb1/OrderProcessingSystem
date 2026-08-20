@@ -18,7 +18,7 @@ interface ProductRow {
   stock_quantity: number;
 }
 
-interface OrderRow {
+export interface OrderRow {
   id: string;
   customer_email: string;
   total_amount: number;
